@@ -36,6 +36,7 @@ class Server {
     const order = payload.order
     const res = {
       match: false,
+      peerId: this.ex.peerId,
       trade: {}
     }
     // TODO: Auth check
@@ -59,6 +60,7 @@ class Server {
         }
       }
     }
+    debug(res)
     handler.reply(null, res)
   }
 }
