@@ -19,12 +19,16 @@ class OrderBook {
     this.buyOrders.push(order)
     //sort descending since higher bids are more attractive for sellers
     this.buyOrders.sort((a, b) => b.price - a.price)
+    // remove filled orders
+    this.buyOrders = this.buyOrders.filter((o) => o.quantity > 0)
   }
 
   addSellOrder(order) {
     this.sellOrders.push(order)
     // sort ascending since lower asks are more attractive for buyers
     this.sellOrders.sort((a, b) => a.price - b.price)
+    // remove filled orders
+    this.sellOrders = this.sellOrders.filter((o) => o.quantity > 0)
   }
 
   match(order) {
