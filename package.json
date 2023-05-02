@@ -1,0 +1,22 @@
+{
+  "name": "bfx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitconrad/bfx.git"
+  },
+  "author": "Conrad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bitconrad/bfx/issues"
+  },
+  "homepage": "https://github.com/bitconrad/bfx",
+  "dependencies": {
+    "debug": "^4.3.4",
+    "grenache-nodejs-http": "^0.7.13",
+    "grenache-nodejs-link": "^0.7.13",
+    "uuid": "^9.0.0"
+  }
+}
