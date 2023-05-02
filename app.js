@@ -5,10 +5,12 @@ const Order = require('./order')
 const pairs = ['BTC/USD', 'ETH/USD', 'ETH/BTC']
 const bfx = new Exchange(pairs)
 
-const order = new Order('buy', 3, 'BTC/USD', 20000)
-const sellOrder1 = new Order('sell', 2, 'BTC/USD', 30000)
-const sellOrder2 = new Order('sell', 2, 'BTC/USD', 29900)
-
-bfx.newOrder(sellOrder1)
-bfx.newOrder(sellOrder2)
-bfx.newOrder(order)
+const generateRandomOrder = () => {
+  const price = Math.floor(Math.random() * 1000)
+  const amount = 1 + Math.floor(Math.random() * 1000)
+  const side = Math.random() > 0.5 ? 'buy' : 'sell'
+  const order = new Order(side, amount, 'BTC/USD', price)
+  bfx.newOrder(order)
+}
+// Create a new random order every 5 seconds
+setInterval(generateRandomOrder, 5000)
