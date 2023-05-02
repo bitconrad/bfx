@@ -6,21 +6,21 @@ debug.enabled = process.argv.includes('-d')
 class Client {
   #maxRetry
 
-  constructor(link) {
-    this.link = link
-    this.rpc = this.initRPC(link)
+  constructor(exchange) {
+    this.ex = exchange
+    this.rpc = this.initRPC()
     this.#maxRetry = 0
   }
 
-  initRPC(link) {
-    const rpc = new PeerRPCClient(link, {})
+  initRPC() {
+    const rpc = new PeerRPCClient(this.ex.link, {})
     rpc.init()
     return rpc
   }
 
   peerLookup() {
     return new Promise((resolve, reject) => {
-      this.link.lookup('order', (err, peers) => {
+      this.ex.link.lookup('order', (err, peers) => {
         if (err) {
           reject(err)
         } else {

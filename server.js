@@ -4,21 +4,21 @@ const debug = require('debug')('app')
 debug.enabled = process.argv.includes('-d')
 
 class Server {
-  constructor(link) {
-    this.link = link
+  constructor(exchange) {
+    this.ex = exchange
     this.rpc = this.initRPC()
     this.orderService = this.initService()
     this.processedOrders = []
 
     setInterval(() => {
-      this.link.announce('order', this.orderService.port, {})
+      this.ex.link.announce('order', this.orderService.port, {})
     }, 1000)
 
     this.orderService.on('request', this.orderHandler)
   }
 
   initRPC() {
-    const rpc = new PeerRPCServer(this.link, {timeout: 5000})
+    const rpc = new PeerRPCServer(this.ex.link, {timeout: 5000})
     rpc.init()
     return rpc
   }

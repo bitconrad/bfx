@@ -18,9 +18,10 @@ class Exchange {
     this.books = {}
     this.initBooks(pairs)
 
-    this.link = this.initLink()
-    this.server = this.newServer(this.link)
-    this.client = this.newClient(this.link)
+    if (this.link = this.initLink()) {
+      this.server = new Server(this)
+      this.client = new Client(this)
+    }
   }
 
   initLink() {
@@ -32,11 +33,11 @@ class Exchange {
   }
 
   newServer(link) {
-    return new Server(this.link)
+    return new Server(link)
   }
 
   newClient(link) {
-    return new Client(this.link)
+    return new Client(link)
   }
 
   initBooks(pairs) {
