@@ -14,6 +14,11 @@ class OrderBook {
       this.sellOrders.push(order)
     }
   }
+
+  match(order) {
+    const orders = order.side == 'buy' ? this.sellOrders : this.buyOrders
+    return orders.filter((o) => o.price <= order.price)
+  }
 }
 
 module.exports = OrderBook
