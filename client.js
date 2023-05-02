@@ -22,7 +22,6 @@ class Client {
         retries++
         if (err) {
           // Network error
-          // TODO: try again
           this.sendOrderRequest(order, retries)
           debug(`ERROR on request: ${err}`)
         } else {
