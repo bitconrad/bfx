@@ -28,8 +28,32 @@ class OrderBook {
   }
 
   match(order) {
-    const orders = order.side == 'buy' ? this.sellOrders : this.buyOrders
-    return orders.filter((o) => o.price <= order.price)
+    let remaining = order.quantity
+    let orders = []
+    let result = []
+
+    if (order.side == 'buy') {
+      orders = this.sellOrders.filter(
+        (o) => o.price <= order.price && !o.isLocked()
+      )
+    } else {
+      orders = this.buyOrders.filter(
+        (o) => o.price >= order.price && !o.isLocked()
+      )
+    }
+
+    for (let i = 0; i < orders.length; i++) {
+      const o = orders[i]
+      if (remaining <= 0) {
+        break
+      }
+      remaining -= o.quantity
+      if (o.lock()) {
+        // if lock is successful, add to matching orders
+        result.push(o)
+      }
+    }
+    return result
   }
 }
 
