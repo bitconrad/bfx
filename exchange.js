@@ -61,7 +61,7 @@ class Exchange {
         if (order.lock()) {
           debug(`Found matching orders for ${order.id}`)
           debug('Lock acquired, performing trade')
-          const trade = new Trade(order, matches)
+          const trade = new Trade(this.peerId, order, matches)
           debug('Trade prepared')
           debug(trade)
           this.books[order.pair].execute(trade)

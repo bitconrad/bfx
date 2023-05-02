@@ -2,8 +2,9 @@
 const {v4: uuidv4} = require('uuid')
 
 class Trade {
-  constructor(order, matches) {
+  constructor(peerId, order, matches) {
     this.id = uuidv4()
+    this.peerId = peerId
     this.order = order
     this.matches = matches
     this.status = 'pending'

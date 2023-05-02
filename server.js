@@ -54,7 +54,7 @@ class Server {
         const matches = this.ex.books[order.pair].match(order)
         res.match = matches.length > 0
         if (res.match) {
-          const trade = new Trade(order, matches)
+          const trade = new Trade(this.ex.peerId, order, matches)
           this.ex.trades.push(trade)
           res.trade = trade
         }
