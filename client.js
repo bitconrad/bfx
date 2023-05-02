@@ -34,12 +34,16 @@ class Client {
   }
 
   async sendOrderRequest(order, retries = 0) {
-    try {
-      await this.peerLookup()
-    } catch (err) {
-      debug(`ERROR on peer lookup: ${err}`)
-      return
+    if (retries == 0) {
+      debug(`Submitting order ${order.id} to the network`)
+      try {
+        await this.peerLookup()
+      } catch (err) {
+        debug(`ERROR on peer lookup: ${err}`)
+        return
+      }
     }
+
     if (retries < this.#maxRetry) {
       this.rpc.request('order', {order: order}, {timeout: 5000}, (err, res) => {
         retries++
@@ -48,7 +52,15 @@ class Client {
           this.sendOrderRequest(order, retries)
           debug(`ERROR on request: ${err}`)
         } else {
-          // TODO: look for a match and return it
+          if (!res.match) {
+            // No match, try again
+            debug('No matching orders found, retrying...')
+            this.sendOrderRequest(order, retries)
+          } else {
+            // Match found
+            debug(res)
+            debug('Match found!')
+          }
           debug(res)
           // TODO: if no match was found retry with another peer
         }
