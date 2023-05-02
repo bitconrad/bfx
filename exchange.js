@@ -3,7 +3,10 @@ const debug = require('debug')('app')
 debug.enabled = process.argv.includes('-d')
 
 const {v4: uuidv4} = require('uuid')
+const Link = require('grenache-nodejs-link')
 
+const Server = require('./server')
+const Client = require('./client')
 const OrderBook = require('./orderbook')
 const Trade = require('./trade')
 
@@ -14,6 +17,26 @@ class Exchange {
 
     this.books = {}
     this.initBooks(pairs)
+
+    this.link = this.initLink()
+    this.server = this.newServer(this.link)
+    this.client = this.newClient(this.link)
+  }
+
+  initLink() {
+    const link = new Link({
+      grape: 'http://127.0.0.1:30001'
+    })
+    link.start()
+    return link
+  }
+
+  newServer(link) {
+    return new Server(this.link)
+  }
+
+  newClient(link) {
+    return new Client(this.link)
   }
 
   initBooks(pairs) {
@@ -47,6 +70,9 @@ class Exchange {
             `Order ${order.id} is already locked, cancelling to avoid a race condition`
           )
         }
+      } else {
+        // no local match found check if there is a match in the network
+        this.client.sendOrderRequest(order)
       }
     }
   }
