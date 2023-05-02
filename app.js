@@ -17,6 +17,10 @@ if (matches.length > 0) {
   if (order.lock()) {
     console.log('Lock acquired, performing trade')
     const trade = new Trade(order, matches)
+    console.log('Trade prepared')
+    console.log(trade)
+    orderbook.execute(trade)
+    console.log('Trade executed')
     console.log(trade)
   } else {
     console.log('Order is locked, cannot trade')
