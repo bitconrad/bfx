@@ -8,6 +8,7 @@ class Server {
     this.link = link
     this.rpc = this.initRPC()
     this.orderService = this.initService()
+    this.processedOrders = []
 
     setInterval(() => {
       this.link.announce('order', this.orderService.port, {})
@@ -30,12 +31,19 @@ class Server {
   }
 
   orderHandler = (rid, key, payload, handler) => {
-    debug('Remote order request received')
-    debug(payload)
-    // send mockup response
+    const order = payload.order
     const res = {
       match: false,
       matches: []
+    }
+    // TODO: Auth check
+    // TODO: check if order is valid (amount, price, etc)
+    if (order && order.id && !this.processedOrders.includes(order.id)) {
+      // add it to processed orders to avoid double processing
+      this.processedOrders.push(order.id)
+      debug('Remote order request received')
+      debug(order)
+      // TODO: look for match and return it
     }
     handler.reply(null, res)
   }
