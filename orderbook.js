@@ -9,10 +9,22 @@ class OrderBook {
 
   addOrder(order) {
     if (order.side == 'buy') {
-      this.buyOrders.push(order)
+      this.addBuyOrder(order)
     } else {
-      this.sellOrders.push(order)
+      this.addSellOrder(order)
     }
+  }
+
+  addBuyOrder(order) {
+    this.buyOrders.push(order)
+    //sort descending since higher bids are more attractive for sellers
+    this.buyOrders.sort((a, b) => b.price - a.price)
+  }
+
+  addSellOrder(order) {
+    this.sellOrders.push(order)
+    // sort ascending since lower asks are more attractive for buyers
+    this.sellOrders.sort((a, b) => a.price - b.price)
   }
 
   match(order) {
