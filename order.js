@@ -2,6 +2,8 @@
 const {v4: uuidv4} = require('uuid')
 
 class Order {
+  #lockTimeout
+
   constructor(side, quantity, pair, price) {
     this.id = uuidv4()
     this.side = side
@@ -10,6 +12,7 @@ class Order {
     this.price = price
     this.locked = false
     this.created = Date.now()
+    this.#lockTimeout = null
   }
 
   lock() {
@@ -18,11 +21,16 @@ class Order {
       return false
     } else {
       this.locked = true
+      // unlock after 10 seconds in case of an issue so it can be reprocessed
+      this.#lockTimeout = setTimeout(() => {
+        this.unlock()
+      }, 10000)
       return true
     }
   }
 
   unlock() {
+    clearTimeout(this.#lockTimeout)
     this.locked = false
   }
 
