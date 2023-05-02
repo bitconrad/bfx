@@ -3,6 +3,8 @@ const {PeerRPCServer} = require('grenache-nodejs-http')
 const debug = require('debug')('app')
 debug.enabled = process.argv.includes('-d')
 
+const Trade = require('./trade')
+
 class Server {
   constructor(exchange) {
     this.ex = exchange
@@ -34,16 +36,28 @@ class Server {
     const order = payload.order
     const res = {
       match: false,
-      matches: []
+      trade: {}
     }
     // TODO: Auth check
     // TODO: check if order is valid (amount, price, etc)
     if (order && order.id && !this.processedOrders.includes(order.id)) {
       // add it to processed orders to avoid double processing
       this.processedOrders.push(order.id)
+      // TODO: add TTL to processed orders
       debug('Remote order request received')
       debug(order)
-      // TODO: look for match and return it
+      // Look for a match
+      if (!this.ex.books[order.pair]) {
+        debug('Book not found for pair ' + order.pair)
+      } else {
+        const matches = this.ex.books[order.pair].match(order)
+        res.match = matches.length > 0
+        if (res.match) {
+          const trade = new Trade(order, matches)
+          this.ex.trades.push(trade)
+          res.trade = trade
+        }
+      }
     }
     handler.reply(null, res)
   }

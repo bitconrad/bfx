@@ -17,6 +17,7 @@ class Exchange {
 
     this.books = {}
     this.initBooks(pairs)
+    this.trades = []
 
     if (this.link = this.initLink()) {
       this.server = new Server(this)
