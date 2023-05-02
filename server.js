@@ -10,13 +10,20 @@ class Server {
     this.ex = exchange
     this.rpc = this.initRPC()
     this.orderService = this.initService()
+    this.tradeService = this.initService()
     this.processedOrders = []
 
     setInterval(() => {
       this.ex.link.announce('order', this.orderService.port, {})
+      this.ex.link.announce(
+        'peer_' + this.ex.peerId,
+        this.tradeService.port,
+        {}
+      )
     }, 1000)
 
     this.orderService.on('request', this.orderHandler)
+    this.tradeService.on('request', this.tradeHandler)
   }
 
   initRPC() {
@@ -36,7 +43,6 @@ class Server {
     const order = payload.order
     const res = {
       match: false,
-      peerId: this.ex.peerId,
       trade: {}
     }
     // TODO: Auth check
@@ -46,7 +52,7 @@ class Server {
       this.processedOrders.push(order.id)
       // TODO: add TTL to processed orders
       debug('Remote order request received')
-      debug(order)
+      //debug(order)
       // Look for a match
       if (!this.ex.books[order.pair]) {
         debug('Book not found for pair ' + order.pair)
@@ -62,6 +68,18 @@ class Server {
     }
     debug(res)
     handler.reply(null, res)
+  }
+
+  tradeHandler = (rid, key, tradeId, handler) => {
+    debug(`Trade request received for trade ${tradeId}`)
+    const trade = this.ex.trades.find((trade) => trade.id == tradeId)
+    if (trade && trade.order.pair) {
+      this.ex.books[trade.order.pair].execute(trade)
+      handler.reply(null, trade)
+    } else {
+      handler.reply(null, [])
+    }
+    debug(trade)
   }
 }
 
