@@ -50,24 +50,56 @@ class Client {
         if (err) {
           // Network error try again
           this.sendOrderRequest(order, retries)
-          debug(`ERROR on request: ${err}`)
-        } else {
-          if (!res.match) {
-            // No match, try again
-            debug('No matching orders found, retrying...')
-            this.sendOrderRequest(order, retries)
-          } else {
-            // Match found
-            debug(res)
-            debug('Match found!')
+          //debug(`ERROR on request: ${err}`)
+        } else if (!res.match) {
+          // No match, try again
+          debug('No matching orders found, retrying...')
+          this.sendOrderRequest(order, retries)
+        } else if (
+          res.trade &&
+          res.trade.peerId &&
+          res.trade.peerId != this.ex.peerId
+        ) {
+          // A different peer has a matching order
+          try {
+            // lock order to avoid race condition
+            if (order.lock()) {
+              // Send trade request
+              debug('Match found, performing trade...')
+              this.sendTradeRequest(order, res.trade)
+            }
+          } catch (err) {
+            debug(err)
           }
-          debug(res)
-          // TODO: if no match was found retry with another peer
         }
       })
     } else {
       debug(`No match found for ${order.id}`)
     }
+  }
+
+  sendTradeRequest(order, trade) {
+    this.rpc.request(
+      'peer_' + trade.peerId,
+      trade.id,
+      {timeout: 5000},
+      (err, res) => {
+        if (err) {
+          // Network error
+          // TODO: check with the peer if the order was executed or not
+          //       and then update remaining quantity and unlock
+          order.unlock()
+          debug(err)
+        } else {
+          // Order executed update remaining quantity and unlock
+          debug(`Order ${order.id} is ${trade.status}`)
+          debug(trade)
+          order.quantity = trade.remaining
+          order.unlock()
+          debug(res)
+        }
+      }
+    )
   }
 }
 
