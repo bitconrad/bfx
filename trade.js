@@ -10,6 +10,16 @@ class Trade {
     this.executed = 0
     this.remaining = order.quantity
   }
+
+  updateStatus() {
+    if (this.remaining == 0) {
+      this.status = 'filled'
+    } else if (this.executed > 0) {
+      this.status = 'partially filled'
+    } else {
+      this.status = 'pending'
+    }
+  }
 }
 
 module.exports = Trade
