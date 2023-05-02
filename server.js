@@ -49,8 +49,7 @@ class Server {
     // TODO: check if order is valid (amount, price, etc)
     if (order && order.id && !this.processedOrders.includes(order.id)) {
       // add it to processed orders to avoid double processing
-      this.processedOrders.push(order.id)
-      // TODO: add TTL to processed orders
+      this.addProcessedOrder(order.id)
       debug('Remote order request received')
       //debug(order)
       // Look for a match
@@ -63,24 +62,39 @@ class Server {
           const trade = new Trade(this.ex.peerId, order, matches)
           this.ex.trades.push(trade)
           res.trade = trade
+          debug(`Found a match for order ${order.id} creating trade ${trade.id}`)
+          debug(res)
         }
       }
     }
-    debug(res)
     handler.reply(null, res)
   }
 
   tradeHandler = (rid, key, tradeId, handler) => {
-    debug(`Trade request received for trade ${tradeId}`)
+    debug(`Trade request received`)
     const trade = this.ex.trades.find((trade) => trade.id == tradeId)
     if (trade && trade.order.pair) {
       this.ex.books[trade.order.pair].execute(trade)
       handler.reply(null, trade)
+      debug(`Trade ${tradeId} executed`)
+      debug(trade)
     } else {
+      debug(`Trade ${tradeId} cancelled to prevent race condition`)
       handler.reply(null, [])
     }
-    debug(trade)
   }
+
+  addProcessedOrder(orderId) {
+    this.processedOrders.push(orderId)
+    // Remove from processedOrders after TTL (10 seconds) to keep the array clean
+    setTimeout(() => {
+      const index = this.processedOrders.indexOf(orderId)
+      if (index != -1) {
+        this.processedOrders.splice(index, 1)
+      }
+    }, 10000)
+  }
+
 }
 
 module.exports = Server
